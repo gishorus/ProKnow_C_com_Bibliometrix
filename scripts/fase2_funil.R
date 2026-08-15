@@ -7,7 +7,7 @@
 # "Alinhamento_Titulo" (1 = alinhado, 0 = não alinhado) no arquivo gerado em
 # data/processed/1_Matriz_Triagem_Titulos.xlsx antes de rodar este script.
 #
-# Pacotes necessários (ver renv.lock para versões travadas):
+# Pacotes necessários (ver docs/session_info.txt para versões validadas):
 #   install.packages(c("dplyr", "readxl", "writexl", "stringr", "here"))
 
 library(dplyr)
@@ -39,6 +39,11 @@ base_triada <- tryCatch({
   stop(paste("[ERRO] Não foi possível ler o arquivo. Verifique se o caminho está correto",
              "e se o arquivo está fechado no Excel.\nDetalhe:", e$message))
 })
+
+if (any(is.na(base_triada$Alinhamento_Titulo))) {
+  stop("[ERRO] Existem linhas com Alinhamento_Titulo em branco. Preencha todas antes de continuar (",
+       sum(is.na(base_triada$Alinhamento_Titulo)), " linha(s) pendente(s)).")
+}
 
 # --------------------------------------------------------------------------
 # 2. Filtrar apenas os artigos ALINHADOS (1) e tratar campos
@@ -124,7 +129,17 @@ portfolio_fase2 <- bind_rows(
   if (nrow(repescados) > 0) repescados %>% mutate(Criterio_ProKnowC = "3. Repescagem (Autoria)")
 ) %>%
   arrange(desc(TC), desc(PY)) %>%
-  mutate(Ordem_Leitura = row_number())
+  mutate(
+    Ordem_Leitura = row_number(),
+    # DOI como link clicavel e resolvivel (corrige exports que trazem so o DOI bruto
+    # ou, em alguns casos observados, uma URL malformada sem o dominio doi.org)
+    DI = case_when(
+      is.na(DI) | DI == "" ~ DI,
+      str_starts(DI, "https://doi.org/") | str_starts(DI, "http://doi.org/") ~ DI,
+      str_starts(DI, "http") ~ str_replace(DI, "^https?://", "https://doi.org/"),
+      TRUE ~ paste0("https://doi.org/", DI)
+    )
+  )
 
 write_xlsx(portfolio_fase2, caminho_saida)
 

@@ -1,5 +1,5 @@
-Validação do pipeline (Fase 1 + Fase 2) realizada em ambiente de teste com
-dataset sintético em 2026-08-14.
+Validação do pipeline (Fase 1 + Fase 2) realizada contra os dados brutos reais
+desta pesquisa em 14-15/08/2026.
 
 R version 4.3.3 (2024-02-29)
 
@@ -11,17 +11,30 @@ Pacotes e versões usados na validação:
   readr    2.1.5
   here     1.0.1
 
-Resultado do teste (dataset sintético, 20 registros fictícios):
-  Fase 1: 20 linhas lidas, validação de colunas OK, matriz de triagem gerada.
-  Fase 2: 19 artigos alinhados -> Pareto: 9 | Recentes: 4 | Repescagem: 0
-          -> Portfólio consolidado: 13 artigos.
+Resultado da validação (dados brutos reais: 121 WoS + 135 Scopus):
+  Fase 1: 256 registros combinados -> 84 duplicatas removidas (2 etapas: DOI,
+          depois titulo normalizado) -> 172 registros unicos na matriz de
+          triagem. Bate exatamente com o funil documentado no README.
 
-Este arquivo documenta o ambiente em que o código foi validado, não substitui
-um renv.lock gerado no ambiente real de produção do usuário. Para travar as
-versões usadas na sua máquina, rode:
+  Fase 2 (sobre a triagem real de 172, com 27 alinhados marcados manualmente):
+          Elite Pareto: 10 | Estado da Arte (>=2024): 15 | Repescagem: 0
+          -> Portfolio consolidado: 25 artigos. Bate exatamente com o
+          portfolio pre-leitura-integral gerado manualmente para esta RSL.
 
+Dois problemas de qualidade de dados foram encontrados e corrigidos durante
+essa validacao, em um CSV exportado manualmente fora deste pipeline (nao nos
+scripts em si):
+  - Coluna de percentual acumulado com o ponto decimal corrompido na
+    exportacao (ex.: "11881188..." em vez de "11.8812"). Os scripts deste
+    repositorio calculam o valor corretamente; o problema estava apenas na
+    exportacao manual feita por fora.
+  - DOIs sem o prefixo "https://doi.org/", tornando o link nao-clicavel.
+    Corrigido: scripts/fase2_funil.R agora formata o DOI como link completo
+    na saida.
+
+Pendencias para reprodutibilidade formal (nao bloqueiam a submissao do
+artigo):
   install.packages("renv")
   renv::init()
   renv::snapshot()
-
-e commite o renv.lock resultante.
+e commitar o renv.lock resultante.

@@ -1,110 +1,143 @@
 # ==============================================================================
-# PROKNOW-C FASE 1: GERAÇÃO DA MATRIZ DE TRIAGEM DE TÍTULOS
-# Origem: Web of Science (Exportação Direta)
-# Construto: Governo Aberto, Resiliência e Gestão Local
+# PROKNOW-C FASE 1: IMPORTAÇÃO, DEDUPLICAÇÃO E MATRIZ DE TRIAGEM DE TÍTULOS
+# Origem: Web of Science (Core Collection) + Scopus (exportações diretas)
+# Construto: Governo Aberto, Resiliência e Consórcios Públicos Intermunicipais
 # ==============================================================================
 #
 # Como rodar:
-#   1. Abra este projeto via ProKnow_C_com_Bibliometrix.Rproj no RStudio
-#      (garante que here::here() resolva a raiz do projeto corretamente).
-#   2. Coloque o export bruto da Web of Science em data/raw/
-#      (pasta ignorada pelo Git — ver README.md, seção "Dados").
-#   3. Ajuste NOME_ARQUIVO_ENTRADA abaixo para o nome do seu arquivo.
-#   4. Rode este script inteiro.
+#   1. Abra este projeto via ProKnow_C_com_Bibliometrix.Rproj no RStudio.
+#   2. Coloque os exports brutos em data/raw/:
+#        - Web of Science: export .xls/.xlsx via "Save to Excel" (Fast5000 ou completo)
+#        - Scopus: export .csv com todos os campos disponíveis
+#   3. Ajuste NOME_ARQUIVO_WOS e NOME_ARQUIVO_SCOPUS abaixo.
+#   4. Rode este script inteiro. Ele gera data/processed/1_Matriz_Triagem_Titulos.xlsx,
+#      já combinada e deduplicada, pronta para marcação manual de Alinhamento_Titulo.
 #
-# Pacotes necessários (ver renv.lock para versões travadas):
-#   install.packages(c("dplyr", "readr", "readxl", "writexl", "here"))
+# Pacotes necessários (ver docs/session_info.txt para versões validadas):
+#   install.packages(c("dplyr", "readr", "readxl", "writexl", "stringr", "here"))
 
 library(dplyr)
 library(readr)
 library(readxl)
 library(writexl)
+library(stringr)
 library(here)
 
 # --------------------------------------------------------------------------
 # 0. Configuração
 # --------------------------------------------------------------------------
-NOME_ARQUIVO_ENTRADA <- "savedrecs.xls"  # troque pelo nome real do seu arquivo
+NOME_ARQUIVO_WOS     <- "savedrecs.xls"
+NOME_ARQUIVO_SCOPUS  <- "scopus_export.csv"
 
-caminho_arquivo <- here("data", "raw", NOME_ARQUIVO_ENTRADA)
+caminho_wos     <- here("data", "raw", NOME_ARQUIVO_WOS)
+caminho_scopus  <- here("data", "raw", NOME_ARQUIVO_SCOPUS)
 caminho_saida   <- here("data", "processed", "1_Matriz_Triagem_Titulos.xlsx")
 
 cat("=======================================================\n")
-cat("  PROKNOW-C: PREPARAÇÃO PARA TRIAGEM DE TÍTULOS\n")
+cat("  PROKNOW-C: IMPORTACAO, DEDUPLICACAO E TRIAGEM DE TITULOS\n")
 cat("=======================================================\n\n")
 
 # --------------------------------------------------------------------------
-# 1. Leitura Inteligente (A WoS às vezes salva CSV com extensão .xls)
+# 1. Leitura e normalização — Web of Science
 # --------------------------------------------------------------------------
-cat("Lendo arquivo bruto da Web of Science...\n")
-base_wos <- tryCatch({
-  read_excel(caminho_arquivo)
-}, error = function(e) {
-  read_csv(caminho_arquivo, show_col_types = FALSE)
-})
+cat("Lendo export da Web of Science...\n")
+wos_bruto <- read_excel(caminho_wos)
 
-cat("-> Base bruta carregada:", nrow(base_wos), "linha(s),", ncol(base_wos), "coluna(s).\n\n")
-
-# --------------------------------------------------------------------------
-# 1b. Validação de sanidade
-# --------------------------------------------------------------------------
-# read_excel() pode "ter sucesso" silenciosamente mesmo quando o arquivo
-# real é XLSX salvo com extensão .xls (ou vice-versa), retornando poucas
-# linhas com colunas erradas sem lançar erro. Isso faz o tryCatch acima
-# nunca cair no fallback de CSV, e o funil seguiria com dado corrompido.
-# A validação abaixo pega esse caso cedo.
-colunas_esperadas <- c("Article Title", "Authors", "Publication Year", "Source Title", "Abstract", "DOI")
-colunas_faltando <- setdiff(colunas_esperadas, names(base_wos))
-
-if (length(colunas_faltando) > 0) {
-  stop(
-    "[ERRO] Arquivo lido, mas faltam colunas esperadas: ",
-    paste(colunas_faltando, collapse = ", "),
-    ".\nIsso costuma indicar que a extensão do arquivo (.xls/.xlsx/.csv) não bate ",
-    "com o formato real do conteúdo. Confira o arquivo em ", caminho_arquivo,
-    " e ajuste a extensão ou o formato de exportação da WoS/Scopus."
-  )
+colunas_wos_esperadas <- c("Article Title", "Authors", "Publication Year", "Source Title", "Abstract", "DOI")
+faltando_wos <- setdiff(colunas_wos_esperadas, names(wos_bruto))
+if (length(faltando_wos) > 0) {
+  stop("[ERRO] Export da WoS sem as colunas esperadas: ", paste(faltando_wos, collapse = ", "),
+       ". Confira ", caminho_wos, ".")
 }
 
-if (nrow(base_wos) < 2) {
-  stop(
-    "[ERRO] Apenas ", nrow(base_wos), " linha(s) foram lidas — abaixo do esperado ",
-    "para um export bibliográfico. Provável leitura incorreta do arquivo. Confira ",
-    caminho_arquivo, "."
-  )
-}
-
-cat("-> Validação de colunas e volume: OK.\n\n")
-
-# --------------------------------------------------------------------------
-# 2. Padronização das Colunas (Mapeamento WoS para Bibliometrix)
-# --------------------------------------------------------------------------
-base_triagem <- base_wos %>%
-  select(
+wos_norm <- wos_bruto %>%
+  transmute(
     TI = `Article Title`,
-    AU = `Authors`,
-    PY = `Publication Year`,
+    AU = Authors,
+    PY = as.numeric(`Publication Year`),
     SO = `Source Title`,
-    TC = contains("Times Cited, WoS Core"),
-    AB = `Abstract`,
-    DI = `DOI`
-  ) %>%
-  mutate(
-    Identificador = row_number(),
-    Alinhamento_Titulo = "",
-    Justificativa_Exclusao = "",
-    TC = as.numeric(TC),
-    PY = as.numeric(PY)
-  ) %>%
-  mutate(TC = ifelse(is.na(TC), 0, TC)) %>%
-  arrange(desc(TC))
+    TC = as.numeric(.data[[grep("Times Cited, WoS Core", names(wos_bruto), value = TRUE)[1]]]),
+    AB = Abstract,
+    DI = DOI,
+    Fonte = "WoS"
+  )
+
+cat("-> WoS:", nrow(wos_norm), "registros.\n")
 
 # --------------------------------------------------------------------------
-# 3. Exportação da Planilha de Trabalho
+# 2. Leitura e normalização — Scopus
 # --------------------------------------------------------------------------
+cat("Lendo export da Scopus...\n")
+scopus_bruto <- read_csv(caminho_scopus, show_col_types = FALSE)
+
+colunas_scopus_esperadas <- c("Title", "Authors", "Year", "Source title", "Cited by", "Abstract", "DOI")
+faltando_scopus <- setdiff(colunas_scopus_esperadas, names(scopus_bruto))
+if (length(faltando_scopus) > 0) {
+  stop("[ERRO] Export da Scopus sem as colunas esperadas: ", paste(faltando_scopus, collapse = ", "),
+       ". Confira ", caminho_scopus, ".")
+}
+
+scopus_norm <- scopus_bruto %>%
+  transmute(
+    TI = Title,
+    AU = Authors,
+    PY = as.numeric(Year),
+    SO = `Source title`,
+    TC = as.numeric(`Cited by`),
+    AB = Abstract,
+    DI = DOI,
+    Fonte = "Scopus"
+  )
+
+cat("-> Scopus:", nrow(scopus_norm), "registros.\n\n")
+
+# --------------------------------------------------------------------------
+# 3. Combinação e deduplicação (duas etapas)
+# --------------------------------------------------------------------------
+# Etapa 1: deduplicação por DOI. WoS é mantida preferencialmente em empates
+# (ordenação por Fonte antes do distinct()), critério documentado aqui por
+# ser arbitrário mas precisa ser consistente e auditável.
+#
+# Etapa 2: deduplicação adicional por título normalizado, sobre o resultado
+# da etapa 1. Necessária porque o mesmo artigo pode ter DOI indexado de forma
+# diferente entre WoS e Scopus (variação de formatação ou erro de OCR/export
+# em uma das bases) — casos que a etapa 1, sozinha, não captura.
+combinado <- bind_rows(wos_norm, scopus_norm) %>%
+  mutate(
+    DI_norm = str_trim(str_to_lower(DI)),
+    TI_norm = str_trim(str_to_lower(str_replace_all(TI, "[[:punct:][:space:]]+", " ")))
+  ) %>%
+  arrange(desc(Fonte == "WoS"))
+
+etapa1 <- combinado %>%
+  mutate(chave_doi = ifelse(!is.na(DI_norm) & DI_norm != "", DI_norm, paste0("__semdoi__", row_number()))) %>%
+  distinct(chave_doi, .keep_all = TRUE)
+
+etapa2 <- etapa1 %>% distinct(TI_norm, .keep_all = TRUE)
+
+n_duplicatas <- nrow(combinado) - nrow(etapa2)
+cat("-> Total combinado (WoS + Scopus):", nrow(combinado), "\n")
+cat("-> Duplicatas removidas:", n_duplicatas, "\n")
+cat("-> Registros unicos apos deduplicacao:", nrow(etapa2), "\n\n")
+
+# --------------------------------------------------------------------------
+# 4. Padronização final e exportação
+# --------------------------------------------------------------------------
+base_triagem <- etapa2 %>%
+  mutate(TC = ifelse(is.na(TC), 0, TC)) %>%
+  arrange(desc(TC)) %>%
+  transmute(
+    TI, AU, PY, SO, TC, AB, DI, Fonte,
+    Identificador = row_number(),
+    Alinhamento_Titulo = NA_real_,
+    Justificativa_Exclusao = NA_character_
+  )
+
 write_xlsx(base_triagem, caminho_saida)
 
 cat("=======================================================\n")
-cat("  MATRIZ GERADA\n")
+cat("  MATRIZ DE TRIAGEM GERADA\n")
+cat("  Total de registros unicos:", nrow(base_triagem), "\n")
 cat("  Arquivo salvo em:", caminho_saida, "\n")
+cat("  Preencha manualmente a coluna Alinhamento_Titulo (1/0) antes da Fase 2.\n")
 cat("=======================================================\n")
