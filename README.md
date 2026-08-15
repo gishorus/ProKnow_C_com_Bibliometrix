@@ -60,7 +60,7 @@ repositório** por restrição de licença dos provedores (Clarivate/Elsevier). 
 Periódicos da Capes/CAFe) e refazer a busca com as strings documentadas no fluxograma
 (`docs/Figura1.drawio`).
 
-Buscas originais realizadas em 21–22/05/2026, retornando 256 registros brutos
+Buscas originais realizadas em 10/05/2026, retornando 256 registros brutos
 (121 Web of Science + 135 Scopus).
 
 ## Reprodutibilidade
