@@ -1,0 +1,32 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.positai
+.httr-oauth
+.quarto
+
+# Dados brutos e processados (licença dos provedores WoS/Scopus não permite redistribuição)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Credenciais e configuração local (nunca versionar)
+setup_git.R
+.Renviron
+*.token
+
+# renv (mantenha apenas renv.lock versionado, não a biblioteca local)
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# SO
+.DS_Store
+Thumbs.db

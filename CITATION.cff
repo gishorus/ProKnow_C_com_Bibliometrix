@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Se usar este software, por favor cite conforme abaixo."
+title: "ProKnow_C_com_Bibliometrix: scripts para as Fases 1 e 2 do protocolo ProKnow-C"
+type: software
+authors:
+  - family-names: Soares
+    given-names: Jean Carlos
+    affiliation: "Programa de Pós-Graduação em Contabilidade, Universidade Federal do Pará (PPGC/UFPA)"
+repository-code: "https://github.com/gishorus/ProKnow_C_com_Bibliometrix"
+license: MIT
+version: 1.0.0
+date-released: "2026-08-14"
+keywords:
+  - ProKnow-C
+  - systematic-literature-review
+  - bibliometrix
+  - open-government
+  - organizational-resilience
+  - intermunicipal-consortia

@@ -1,0 +1,27 @@
+Validação do pipeline (Fase 1 + Fase 2) realizada em ambiente de teste com
+dataset sintético em 2026-08-14.
+
+R version 4.3.3 (2024-02-29)
+
+Pacotes e versões usados na validação:
+  dplyr    1.1.4
+  readxl   1.4.3
+  writexl  1.5.0
+  stringr  1.5.1
+  readr    2.1.5
+  here     1.0.1
+
+Resultado do teste (dataset sintético, 20 registros fictícios):
+  Fase 1: 20 linhas lidas, validação de colunas OK, matriz de triagem gerada.
+  Fase 2: 19 artigos alinhados -> Pareto: 9 | Recentes: 4 | Repescagem: 0
+          -> Portfólio consolidado: 13 artigos.
+
+Este arquivo documenta o ambiente em que o código foi validado, não substitui
+um renv.lock gerado no ambiente real de produção do usuário. Para travar as
+versões usadas na sua máquina, rode:
+
+  install.packages("renv")
+  renv::init()
+  renv::snapshot()
+
+e commite o renv.lock resultante.
