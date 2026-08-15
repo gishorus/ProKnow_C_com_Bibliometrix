@@ -30,10 +30,10 @@ Science e Scopus:
 │   ├── LICENSE-CC-BY.md     # Licença do conteúdo em docs/
 │   └── session_info.txt     # Versões de R/pacotes validadas
 ├── data/
-│   ├── raw/                 # Exports brutos (NÃO versionado — ver seção "Dados")
+│   ├── raw/                 # Exports brutos (NÃO versionado, ver seção "Dados")
 │   └── processed/           # Planilhas geradas pelos scripts (NÃO versionado)
 ├── ProKnow_C_com_Bibliometrix.Rproj
-├── LICENSE                  # MIT — código (scripts/)
+├── LICENSE                  # MIT, código (scripts/)
 └── CITATION.cff
 ```
 
@@ -69,7 +69,7 @@ da Capes/CAFe) e refazer a busca com as strings documentadas no fluxograma
 Buscas realizadas em 10/05/2026 nas bases Web of Science (Core Collection) e Scopus,
 retornando 256 registros brutos (121 Web of Science + 135 Scopus).
 
-## Deduplicação — critério documentado
+## Deduplicação: critério documentado
 
 A deduplicação usa duas etapas, nessa ordem:
 
@@ -92,7 +92,7 @@ Fase 2, aplicada sobre a triagem real de 27 artigos alinhados, reproduz exatamen
 
 Versões de R/pacotes usadas nessa validação estão em `docs/session_info.txt`. Um
 `renv.lock` formal (via `renv::init()` + `renv::snapshot()`) ainda não foi gerado neste
-repositório — fica como próximo passo de engenharia, não bloqueador para a submissão do
+repositório. Fica como próximo passo de engenharia, não bloqueador para a submissão do
 artigo.
 
 ## Funil ProKnow-C (resultado desta RSL)
