@@ -1,7 +1,7 @@
 # ProKnow_C_com_Bibliometrix
 
 Scripts em R para as Fases 1 e 2 do protocolo **ProKnow-C** (Knowledge Development
-Process — Constructivist), aplicados à Revisão Sistemática de Literatura (RSL) sobre
+Process, Constructivist), aplicados à Revisão Sistemática de Literatura (RSL) sobre
 **Governo Aberto e Resiliência Organizacional em Consórcios Públicos Intermunicipais**,
 desenvolvida no Programa de Pós-Graduação em Contabilidade (PPGC/UFPA).
 
