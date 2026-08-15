@@ -13,8 +13,8 @@ Science / Scopus:
 1. **Fase 1 Matriz de Triagem de Títulos**: padroniza o export bruto e prepara a
    planilha para marcação manual de alinhamento (coluna `Alinhamento_Titulo`).
 2. **Fase 2 Funil Matemático**: aplica os três pilares de representatividade
-   científica sobre os artigos alinhados — Elite Pareto (80% das citações), Estado da
-   Arte (artigos recentes) e Repescagem por Autoria — e consolida o portfólio para
+   científica sobre os artigos alinhados, Elite Pareto (80% das citações), Estado da
+   Arte (artigos recentes) e Repescagem por Autoria, e consolida o portfólio para
    leitura de resumos.
 
 ## Estrutura do repositório
