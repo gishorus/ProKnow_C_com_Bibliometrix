@@ -40,7 +40,7 @@
         <mxCell id="Q-DfoM-TEG-bXC_HS8mE-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=16;align=left;verticalAlign=middle;spacing=8;" value="Número de artigos que não puderam ser acessados integralmente: 3" vertex="1">
           <mxGeometry height="55" width="390" x="1020" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="Q-DfoM-TEG-bXC_HS8mE-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=16;align=left;verticalAlign=middle;spacing=8;" value="Número de artigos disponíveis para acesso e leitura integral: 21 (1 artigo excluído após leitura integral)" vertex="1">
+        <mxCell id="Q-DfoM-TEG-bXC_HS8mE-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=16;align=left;verticalAlign=middle;spacing=8;" value="Número de artigos disponíveis para acesso e leitura integral: 22" vertex="1">
           <mxGeometry height="70" width="390" x="1020" y="563" as="geometry" />
         </mxCell>
         <mxCell id="Q-DfoM-TEG-bXC_HS8mE-14" parent="1" style="shape=parallelogram;size=20;fixedSize=1;whiteSpace=wrap;html=1;strokeWidth=1.5;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;labelBackgroundColor=none;labelBorderColor=none;" value="Portfólio Bibliográfico (PB)&lt;br&gt;22" vertex="1">
